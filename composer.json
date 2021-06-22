@@ -1,0 +1,26 @@
+{
+    "name": "forter/magento2-module-forter-adyen",
+    "description": "Adyen Extension for Forter Fraud Prevention For Magento 2",
+    "require": {
+        "php": ">=5.6"
+    },
+    "type": "magento2-module",
+    "license": [
+        "proprietary"
+    ],
+    "version": "1.0.0",
+    "authors": [{
+        "name": "Forter Dev",
+        "email": "support@forter.com",
+        "role": "Developer",
+        "homepage": "https://www.forter.com/"
+    }],
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Forter\\Adyen\\": ""
+        }
+    }
+}
