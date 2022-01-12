@@ -38,6 +38,9 @@ class Order
     public function aroundBuildTransaction(RequestBuilderOrder $subject, callable $proceed, $order, $orderStage)
     {
         try {
+            $logArray = [];
+            $this->forterConfig->log('Forter Adyen Module integration start');
+            $logArray[1] = 'Forter Adyen Module integration start';
             if (!$this->forterConfig->isEnabled()) {
                 $result = $proceed($order, $orderStage);
                 return $result;
@@ -52,11 +55,18 @@ class Order
             $notification = $notifications->getFirstItem();
 
             if ($notifications->getSize() < 1) {
+                $logArray[0] = 'Forter Adyen Module:' . $result['orderId'] . ' No AUTHORISATION result was found for this user';
+                $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ' No AUTHORISATION result was found for this user');
                 return $result;
             }
 
             $method = $order->getPayment()->getMethod();
+            $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Payment method is:' . $method);
+            $logArray[2] = 'Forter Adyen Module:' . $result['orderId'] . ', Payment method is:' . $method;
+
             if ($method == 'adyen_cc') {
+                $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_cc method';
+                $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_cc method');
                 $notificationAdditionalData = unserialize($notification->getAdditionalData());
 
                 if ($notificationAdditionalData['expiryDate']) {
@@ -103,6 +113,8 @@ class Order
                     $result['payment'][0]['creditCard']['lastFourDigits'] = $notificationAdditionalData['cardSummary'];
                 }
             } elseif ($method == 'adyen_hpp') {
+                $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
+                $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
                 $notificationAdditionalData = unserialize($notification->getAdditionalData());
 
                 if (isset($notificationAdditionalData['paypalPayerId'])) {
@@ -123,7 +135,7 @@ class Order
 
                 if (isset($notificationAdditionalData['paypalPaymentStatus'])) {
                     $result['payment'][0]['paypal']['paymentStatus']= $notificationAdditionalData['paypalPaymentStatus'];
-                } else {
+                } elseif (isset($notificationAdditionalData['paypalPayerStatus'])) {
                     $result['payment'][0]['paypal']['paymentStatus']= $notificationAdditionalData['paypalPayerStatus'];
                 }
 
@@ -148,7 +160,11 @@ class Order
                 $result['payment'][0]['paypal']['paymentGatewayData']['gatewayTransactionId'] = $order->getPayment()->getCcTransId() ? $order->getPayment()->getCcTransId() : '';
                 $result['payment'][0]['paypal']['fullPaypalResponsePayload'] = $notificationAdditionalData ? $notificationAdditionalData : '';
             }
+            $logArray[4] = $result['payment'];
+            $logArray[5] = json_encode('Forter Adyen Module integration end');
+            $this->forterConfig->log('Forter Adyen Module integration end');
 
+            $result['additionalInformation']['adyen_debug'] = $logArray;
             return $result;
         } catch (Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
