@@ -60,8 +60,7 @@ class Order
                 return $result;
             }
 
-            //$method = $order->getPayment()->getMethod();
-            $method = 'adyen_hpp';
+            $method = $order->getPayment()->getMethod();
             $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Payment method is:' . $method);
             $logArray[2] = 'Forter Adyen Module:' . $result['orderId'] . ', Payment method is:' . $method;
 
