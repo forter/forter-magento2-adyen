@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../Magento/Backend/etc/system_file.xsd">
+    <system>
+        <tab id="forter" translate="label" sortOrder="700">
+            <label>Forter</label>
+        </tab>
+        <section id="forter_adyen" translate="label" sortOrder="500" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Adyen Module Configuration</label>
+            <tab>forter</tab>
+            <resource>Forter_Adyen::config</resource>
+            <group id="settings" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Basic Settings</label>
+                <field id="module_version" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Extension Version</label>
+                    <frontend_model>Forter\Adyen\Block\Adminhtml\System\Config\ModuleVersion</frontend_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
