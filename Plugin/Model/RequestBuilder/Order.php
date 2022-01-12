@@ -57,6 +57,7 @@ class Order
             if ($notifications->getSize() < 1) {
                 $logArray[0] = 'Forter Adyen Module:' . $result['orderId'] . ' No AUTHORISATION result was found for this user';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ' No AUTHORISATION result was found for this user');
+                $result['additionalInformation']['adyen_debug'] = $logArray;
                 return $result;
             }
 
