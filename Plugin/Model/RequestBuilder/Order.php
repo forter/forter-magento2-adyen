@@ -62,6 +62,7 @@ class Order
             }
 
             $method = $order->getPayment()->getMethod();
+            $payment = $order->getPayment();
             $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Payment method is:' . $method);
             $logArray[2] = 'Forter Adyen Module:' . $result['orderId'] . ', Payment method is:' . $method;
 
@@ -113,7 +114,7 @@ class Order
                 if (isset($notificationAdditionalData['cardSummary'])) {
                     $result['payment'][0]['creditCard']['lastFourDigits'] = $notificationAdditionalData['cardSummary'];
                 }
-            } elseif ($method == 'adyen_hpp') {
+            } elseif ($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'klarna_account') == false)) {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
                 $notificationAdditionalData = unserialize($notification->getAdditionalData());
@@ -167,7 +168,7 @@ class Order
 
             $result['additionalInformation']['adyen_debug'] = $logArray;
             return $result;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
 
