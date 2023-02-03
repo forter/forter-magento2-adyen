@@ -6,26 +6,36 @@ use Adyen\Payment\Model\ResourceModel\Notification\CollectionFactory;
 use Forter\Forter\Model\AbstractApi;
 use Forter\Forter\Model\Config;
 use Forter\Forter\Model\RequestBuilder\Order as RequestBuilderOrder;
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Serialize\SerializerInterface;
 
 class Order
 {
     /**
-      * @var AbstractApi
-      */
+     * @var AbstractApi
+     */
     protected $abstractApi;
+
+    /**
+     * @var SerializerInterface
+     */
+    private $serializer;
 
     /**
      * Order Plugin constructor.
      * @param Config $forterConfig
+     * @param SerializerInterface|null $serializer
      */
     public function __construct(
         Config $forterConfig,
         AbstractApi $abstractApi,
-        CollectionFactory $notificationFactory
+        CollectionFactory $notificationFactory,
+        SerializerInterface $serializer = null
     ) {
         $this->_notificationFactory = $notificationFactory;
         $this->forterConfig = $forterConfig;
         $this->abstractApi = $abstractApi;
+        $this->serializer = $serializer ?: ObjectManager::getInstance()->get(SerializerInterface::class);
     }
 
     /**
@@ -69,7 +79,7 @@ class Order
             if ($method == 'adyen_cc') {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_cc method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_cc method');
-                $notificationAdditionalData = unserialize($notification->getAdditionalData());
+                $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());
 
                 if ($notificationAdditionalData['expiryDate']) {
                     $ExpireDate = explode("/", $notificationAdditionalData['expiryDate']);
@@ -114,10 +124,10 @@ class Order
                 if (isset($notificationAdditionalData['cardSummary'])) {
                     $result['payment'][0]['creditCard']['lastFourDigits'] = $notificationAdditionalData['cardSummary'];
                 }
-            } elseif ($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'klarna_account') == false)) {
+            } elseif ($method == 'adyen_hpp' && (strpos($payment->getData('cc_type'), 'paypal') !== false )) {
                 $logArray[3] = 'Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method';
                 $this->forterConfig->log('Forter Adyen Module:' . $result['orderId'] . ', Entered adyen_hpp method');
-                $notificationAdditionalData = unserialize($notification->getAdditionalData());
+                $notificationAdditionalData = $this->serializer->unserialize($notification->getAdditionalData());
 
                 if (isset($notificationAdditionalData['paypalPayerId'])) {
                     $result['payment'][0]['paypal']['payerId']= $notificationAdditionalData['paypalPayerId'];
@@ -171,7 +181,5 @@ class Order
         } catch (\Exception $e) {
             $this->abstractApi->reportToForterOnCatch($e);
         }
-
-        return;
     }
 }
