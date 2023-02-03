@@ -3,4 +3,9 @@
   <type name="Forter\Forter\Model\RequestBuilder\Order">
       <plugin name="forter_json_adyen_plugin" type="Forter\Adyen\Plugin\Model\RequestBuilder\Order" />
   </type>
+  <type name="Forter\Adyen\Plugin\Model\RequestBuilder\Order">
+      <arguments>
+        <argument name="serializer" xsi:type="object">Magento\Framework\Serialize\Serializer\Serialize</argument>
+      </arguments>
+  </type>
 </config>
